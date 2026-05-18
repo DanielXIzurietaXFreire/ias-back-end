@@ -1,0 +1,326 @@
+IAS Backend - API Documentation
+===============================
+
+Base URL:
+http://localhost:3000/api/v1
+
+Nota: los endpoints que requieren autenticación JWT deben usar el header:
+Authorization: Bearer {{JWT_TOKEN}}
+
+1) AUTHENTICATION
+-----------------
+
+POST /auth/register
+- Descripción: Registrar un nuevo usuario en el sistema.
+- Autenticación: No requerida.
+- Body JSON:
+  {
+    "email": "usuario@cooperativa.com",
+    "password": "SecurePassword123!",
+    "name": "Juan",
+    "lastname": "Pérez"
+  }
+- Ejemplo Postman:
+  Método: POST
+  URL: http://localhost:3000/api/v1/auth/register
+  Body > raw > JSON
+- Respuesta esperada: accessToken, user {id, email, name, lastname, role}
+
+POST /auth/login
+- Descripción: Iniciar sesión y obtener token JWT.
+- Autenticación: No requerida.
+- Body JSON:
+  {
+    "email": "usuario@cooperativa.com",
+    "password": "SecurePassword123!"
+  }
+- Ejemplo Postman:
+  Método: POST
+  URL: http://localhost:3000/api/v1/auth/login
+  Body > raw > JSON
+- Respuesta esperada: accessToken, user {id, email, name, lastname, role}
+
+GET /auth/profile
+- Descripción: Obtener perfil del usuario autenticado.
+- Autenticación: Requiere JWT.
+- Headers:
+  Authorization: Bearer {{JWT_TOKEN}}
+- Ejemplo Postman:
+  Método: GET
+  URL: http://localhost:3000/api/v1/auth/profile
+- Respuesta esperada: Datos del usuario actual.
+
+2) USERS
+--------
+
+GET /users
+- Descripción: Obtener todos los usuarios registrados.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/users
+  Header: Authorization: Bearer {{JWT_TOKEN}}
+
+GET /users/stats
+- Descripción: Obtener estadísticas de usuarios por rol.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/users/stats
+
+GET /users/:id
+- Descripción: Obtener información de un usuario por su UUID.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/users/123e4567-e89b-12d3-a456-426614174000
+
+PATCH /users/:id
+- Descripción: Actualizar nombre y apellido de un usuario.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "name": "NuevoNombre",
+    "lastname": "NuevoApellido"
+  }
+- Ejemplo Postman:
+  PATCH http://localhost:3000/api/v1/users/123e4567-e89b-12d3-a456-426614174000
+
+DELETE /users/:id
+- Descripción: Eliminar un usuario del sistema.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  DELETE http://localhost:3000/api/v1/users/123e4567-e89b-12d3-a456-426614174000
+
+3) CAMERAS
+----------
+
+POST /cameras
+- Descripción: Crear una nueva cámara de vigilancia.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "name": "Cámara Entrada Principal",
+    "location": "Entrada frontal - Sucursal Centro",
+    "ip": "192.168.1.10",
+    "streamUrl": "rtsp://192.168.1.10/live",
+    "status": "ACTIVA"
+  }
+- Ejemplo Postman:
+  POST http://localhost:3000/api/v1/cameras
+
+GET /cameras
+- Descripción: Obtener todas las cámaras.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/cameras
+
+GET /cameras/stats
+- Descripción: Obtener estadísticas de cámaras.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/cameras/stats
+
+GET /cameras/status/:status
+- Descripción: Filtrar cámaras por estado.
+- Autenticación: No requerida.
+- Valores validos: ACTIVA, INACTIVA, ERROR
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/cameras/status/ACTIVA
+
+GET /cameras/:id
+- Descripción: Obtener una cámara por su UUID.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/cameras/123e4567-e89b-12d3-a456-426614174000
+
+PATCH /cameras/:id
+- Descripción: Actualizar datos de una cámara.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "name": "Cámara Actualizada",
+    "location": "Nueva ubicación",
+    "ip": "192.168.1.11",
+    "streamUrl": "rtsp://192.168.1.11/live",
+    "status": "INACTIVA"
+  }
+- Ejemplo Postman:
+  PATCH http://localhost:3000/api/v1/cameras/123e4567-e89b-12d3-a456-426614174000
+
+PATCH /cameras/:id/status
+- Descripción: Cambiar el estado de una cámara.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "status": "ERROR"
+  }
+- Ejemplo Postman:
+  PATCH http://localhost:3000/api/v1/cameras/123e4567-e89b-12d3-a456-426614174000/status
+
+DELETE /cameras/:id
+- Descripción: Eliminar una cámara.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  DELETE http://localhost:3000/api/v1/cameras/123e4567-e89b-12d3-a456-426614174000
+
+4) EVENTS
+---------
+
+POST /events
+- Descripción: Crear un evento generado por el sistema IA.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "cameraId": "123e4567-e89b-12d3-a456-426614174000",
+    "type": "persona_detectada",
+    "description": "Persona entrando a la sucursal",
+    "location": "Entrada frontal",
+    "imageUrl": "https://cdn.example.com/event1.jpg",
+    "confidence": 0.92,
+    "priority": "MEDIA",
+    "status": "PENDIENTE"
+  }
+- Ejemplo Postman:
+  POST http://localhost:3000/api/v1/events
+
+GET /events
+- Descripción: Obtener lista de eventos, con filtros opcionales.
+- Autenticación: No requerida.
+- Query params opcionales:
+  cameraId, status, priority
+- Ejemplos Postman:
+  GET http://localhost:3000/api/v1/events
+  GET http://localhost:3000/api/v1/events?status=PENDIENTE
+  GET http://localhost:3000/api/v1/events?cameraId=123e4567-e89b-12d3-a456-426614174000&priority=ALTA
+
+GET /events/pending
+- Descripción: Obtener solo los eventos pendientes de revisión.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/events/pending
+
+GET /events/stats
+- Descripción: Obtener estadísticas de eventos.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/events/stats
+
+GET /events/camera/:cameraId
+- Descripción: Obtener eventos de una cámara específica.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/events/camera/123e4567-e89b-12d3-a456-426614174000
+
+GET /events/:id
+- Descripción: Obtener un evento por su UUID.
+- Autenticación: No requerida.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/events/123e4567-e89b-12d3-a456-426614174000
+
+PATCH /events/:id
+- Descripción: Actualizar un evento (estado, reviewer, prioridad, etc.).
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "status": "REVISADO",
+    "priority": "ALTA",
+    "reviewedBy": "123e4567-e89b-12d3-a456-426614174000",
+    "reviewedAt": "2026-05-17T12:00:00.000Z"
+  }
+- Ejemplo Postman:
+  PATCH http://localhost:3000/api/v1/events/123e4567-e89b-12d3-a456-426614174000
+
+DELETE /events/:id
+- Descripción: Eliminar un evento.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  DELETE http://localhost:3000/api/v1/events/123e4567-e89b-12d3-a456-426614174000
+
+5) ALERTS
+---------
+
+POST /alerts
+- Descripción: Crear una alerta asociada a un evento.
+- Autenticación: Requiere JWT.
+- Body JSON:
+  {
+    "eventId": "123e4567-e89b-12d3-a456-426614174000",
+    "message": "Alerta de prueba: movimiento detectado",
+    "priority": "ALTA"
+  }
+- Ejemplo Postman:
+  POST http://localhost:3000/api/v1/alerts
+
+GET /alerts
+- Descripción: Obtener todas las alertas.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts
+
+GET /alerts/stats
+- Descripción: Obtener estadísticas de alertas.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts/stats
+
+GET /alerts/critical
+- Descripción: Obtener alertas críticas de las últimas 24 horas.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts/critical
+
+GET /alerts/priority/:priority
+- Descripción: Obtener alertas filtradas por prioridad.
+- Autenticación: Requiere JWT.
+- Valores validos: BAJA, MEDIA, ALTA, CRITICA
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts/priority/CRITICA
+
+GET /alerts/event/:eventId
+- Descripción: Obtener alertas asociadas a un evento.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts/event/123e4567-e89b-12d3-a456-426614174000
+
+GET /alerts/:id
+- Descripción: Obtener una alerta por su UUID.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  GET http://localhost:3000/api/v1/alerts/123e4567-e89b-12d3-a456-426614174000
+
+DELETE /alerts/:id
+- Descripción: Eliminar una alerta.
+- Autenticación: Requiere JWT.
+- Ejemplo Postman:
+  DELETE http://localhost:3000/api/v1/alerts/123e4567-e89b-12d3-a456-426614174000
+
+Uso rápido en Postman
+---------------------
+1. Crear colección "IAS Backend".
+2. Registrar usuario: POST /auth/register.
+3. Login: POST /auth/login.
+4. Copiar el accessToken de la respuesta.
+5. Agregar header global a las peticiones protegidas:
+   Authorization: Bearer {{JWT_TOKEN}}
+6. Usar los endpoints de /users, /cameras, /events y /alerts.
+
+Notas finales
+-------------
+- El prefijo global de la API es /api/v1.
+- Si la aplicación corre en un puerto distinto, ajustar la URL base.
+- Para crear el superadmin directamente, usa el seed o inserta en la tabla users con role = 'superadmin'.
+
+
+===============================
+Descripcion Proyecto IA
+
+Mi imagen Docker (ias-backend) se construyó correctamente, pero al ejecutar `docker run -p 3000:3000 --env-file .env.test ias-backend` me dice que no encuentra el archivo `.env.test`.
+
+Necesito que me ayudes a **crear el archivo `.env.test`** en la raíz del proyecto, basado en mi archivo `.env.example`. Luego, quiero ejecutar el contenedor correctamente y verificar que la aplicación funciona.
+
+
+1. El contenido recomendado para `.env.test` (debo usar una base de datos de prueba, por ejemplo, una base de datos PostgreSQL local o de Supabase, y un JWT_SECRET temporal).
+2. Los comandos exactos para:
+   - Crear el archivo `.env.test` (desde PowerShell en Windows).
+   - Ejecutar el contenedor usando ese archivo.
+   - Verificar que el endpoint `/health` responde `200` (si tengo implementado health check) o que la app arranca sin errores.
+
+Mi entorno: Windows, PowerShell, Docker Desktop.

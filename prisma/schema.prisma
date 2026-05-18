@@ -1,0 +1,173 @@
+// ======================================================
+// IAS Backend - Prisma Schema
+// ======================================================
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+// ======================================================
+// ENUMS
+// ======================================================
+//
+
+enum Role {
+  SUPERADMIN @map("superadmin")
+  USUARIO    @map("usuario")
+}
+
+enum CameraStatus {
+  ACTIVA   @map("activa")
+  INACTIVA @map("inactiva")
+  ERROR    @map("error")
+}
+
+enum EventPriority {
+  BAJA    @map("baja")
+  MEDIA   @map("media")
+  ALTA    @map("alta")
+  CRITICA @map("critica")
+}
+
+enum EventStatus {
+  PENDIENTE @map("pendiente")
+  REVISADO  @map("revisado")
+  RESUELTO  @map("resuelto")
+}
+
+enum AlertPriority {
+  BAJA    @map("baja")
+  MEDIA   @map("media")
+  ALTA    @map("alta")
+  CRITICA @map("critica")
+}
+
+//
+// ======================================================
+// USERS
+// ======================================================
+//
+
+model User {
+  id String @id @default(uuid()) @db.Uuid
+
+  email    String @unique @db.VarChar(255)
+  password String @db.VarChar(255)
+
+  name     String @db.VarChar(100)
+  lastname String @db.VarChar(100)
+
+  role Role @default(USUARIO)
+
+  reviewedEvents Event[] @relation("ReviewedBy")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+
+  @@index([email])
+  @@index([role])
+}
+
+//
+// ======================================================
+// CAMERAS
+// ======================================================
+//
+
+model Camera {
+  id String @id @default(uuid()) @db.Uuid
+
+  name     String @db.VarChar(255)
+  location String @db.VarChar(255)
+
+  ip        String  @db.VarChar(45)
+  streamUrl String? @db.VarChar(500)
+
+  status CameraStatus @default(INACTIVA)
+
+  events Event[]
+
+  createdAt DateTime @default(now())
+
+  @@map("cameras")
+
+  @@index([status])
+  @@index([location])
+}
+
+//
+// ======================================================
+// EVENTS
+// ======================================================
+//
+
+model Event {
+  id String @id @default(uuid()) @db.Uuid
+
+  cameraId String @db.Uuid
+  camera   Camera @relation(fields: [cameraId], references: [id], onDelete: Cascade)
+
+  type        String  @db.VarChar(100)
+  description String? @db.Text
+  location    String? @db.VarChar(255)
+
+  imageUrl String? @db.VarChar(500)
+
+  confidence Float?
+  aiMetadata Json?
+
+  priority EventPriority @default(MEDIA)
+  status   EventStatus   @default(PENDIENTE)
+
+  reviewedBy String? @db.Uuid
+
+  reviewer User? @relation("ReviewedBy", fields: [reviewedBy], references: [id], onDelete: SetNull)
+
+  reviewedAt DateTime?
+
+  alerts Alert[]
+
+  createdAt DateTime @default(now())
+
+  @@map("events")
+
+  @@index([cameraId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([reviewedBy])
+}
+
+//
+// ======================================================
+// ALERTS
+// ======================================================
+//
+
+model Alert {
+  id String @id @default(uuid()) @db.Uuid
+
+  eventId String @db.Uuid
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  message String @db.Text
+
+  priority AlertPriority @default(MEDIA)
+
+  createdAt DateTime @default(now())
+
+  @@map("alerts")
+
+  @@index([eventId])
+  @@index([priority])
+  @@index([createdAt])
+}
