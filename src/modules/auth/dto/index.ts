@@ -69,6 +69,31 @@ export class LoginDto {
 }
 
 /**
+ * DTO para cambio de contraseña
+ */
+export class ChangePasswordDto {
+  @ApiProperty({
+    example: 'CurrentPassword123!',
+    description: 'Contraseña actual del usuario',
+  })
+  @IsString()
+  @MinLength(8)
+  currentPassword: string;
+
+  @ApiProperty({
+    example: 'NewSecurePassword123!',
+    description: 'Nueva contraseña. Debe ser diferente y segura',
+  })
+  @IsString()
+  @MinLength(8, { message: 'La nueva contraseña debe tener mínimo 8 caracteres' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'La contraseña debe contener mayúsculas, minúsculas, números y caracteres especiales (@$!%*?&)',
+  })
+  newPassword: string;
+}
+
+/**
  * DTO para respuesta de autenticación
  */
 export class AuthResponseDto {

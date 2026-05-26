@@ -1,9 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@database/prisma.service';
-import { RegisterDto, LoginDto, AuthResponseDto, JwtPayload } from './dto';
+import { RegisterDto, LoginDto, AuthResponseDto, JwtPayload, ChangePasswordDto } from './dto';
 
 /**
  * AuthService - Servicio de autenticación
@@ -180,5 +180,50 @@ export class AuthService {
         createdAt: true,
       },
     });
+  }
+
+  /**
+   * Cambia la contraseña de un usuario autenticado.
+   *
+   * @param userId ID del usuario autenticado
+   * @param changePasswordDto Datos de cambio de contraseña
+   * @returns Mensaje de confirmación
+   */
+  async changePassword(userId: string, changePasswordDto: ChangePasswordDto) {
+    const { currentPassword, newPassword } = changePasswordDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('Contraseña actual incorrecta');
+    }
+
+    if (currentPassword === newPassword) {
+      throw new BadRequestException('La nueva contraseña debe ser diferente a la actual');
+    }
+
+    let bcryptRounds = parseInt(this.configService.get<string>('BCRYPT_ROUNDS') || '10', 10);
+    if (Number.isNaN(bcryptRounds) || bcryptRounds <= 0) {
+      bcryptRounds = 10;
+    }
+
+    const salt = await bcrypt.genSalt(bcryptRounds);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+
+    return {
+      message: 'Contraseña actualizada correctamente',
+    };
   }
 }
