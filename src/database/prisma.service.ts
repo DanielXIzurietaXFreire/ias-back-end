@@ -21,10 +21,37 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   private readonly logger = new Logger(PrismaService.name);
 
   constructor() {
+    const databaseUrl = process.env.DATABASE_URL ?? '';
+    const normalizedUrl = PrismaService.normalizeDatabaseUrl(databaseUrl);
+
     super({
+      datasources: {
+        db: {
+          url: normalizedUrl,
+        },
+      },
       log: ['info', 'warn', 'error'],
       errorFormat: 'pretty',
     });
+  }
+
+  private static normalizeDatabaseUrl(databaseUrl: string): string {
+    if (!databaseUrl) {
+      return databaseUrl;
+    }
+
+    try {
+      const parsedUrl = new URL(databaseUrl);
+      const params = parsedUrl.searchParams;
+
+      params.set('pgbouncer', 'false');
+      params.set('connection_limit', '3');
+
+      parsedUrl.search = params.toString();
+      return parsedUrl.toString();
+    } catch (error) {
+      return databaseUrl;
+    }
   }
 
   /**
