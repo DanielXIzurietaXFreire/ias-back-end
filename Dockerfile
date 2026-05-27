@@ -39,4 +39,5 @@ USER node
 
 EXPOSE 3000
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-c", "npm run migrate:deploy && npm run start:prod"]
+CMD ["sh", "-c", "npm run start:prod"]
+
