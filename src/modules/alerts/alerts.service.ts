@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { AlertPriority } from '@prisma/client';
 import { PrismaService } from '@database/prisma.service';
 import { CreateAlertDto, AlertResponseDto } from './dto';
+import { EventsGateway } from '@gateways/events.gateway';
 
 /**
  * AlertsService - Servicio de gestión de alertas
@@ -15,7 +16,10 @@ import { CreateAlertDto, AlertResponseDto } from './dto';
  */
 @Injectable()
 export class AlertsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('EventsGateway') private readonly eventsGateway: any,
+  ) {}
 
   /**
    * Crea una nueva alerta
@@ -39,6 +43,13 @@ export class AlertsService {
         ...createAlertDto,
         priority: createAlertDto.priority || AlertPriority.MEDIA,
       },
+    });
+
+    // 🔴 EMITIR ALERTA A FLUTTER VÍA WEBSOCKET
+    this.eventsGateway.emitAlertTriggered({
+      ...alert,
+      eventId: alert.eventId,
+      timestamp: new Date().toISOString(),
     });
 
     return alert as AlertResponseDto;

@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { EventPriority, EventStatus } from '@prisma/client';
 import { PrismaService } from '@database/prisma.service';
 import { CreateEventDto, UpdateEventDto, EventResponseDto } from './dto';
+import { EventsGateway } from '@gateways/events.gateway';
 
 /**
  * EventsService - Servicio de gestión de eventos
@@ -16,7 +17,10 @@ import { CreateEventDto, UpdateEventDto, EventResponseDto } from './dto';
  */
 @Injectable()
 export class EventsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject('EventsGateway') private readonly eventsGateway: any,
+  ) {}
 
   /**
    * Crea un nuevo evento (desde sistema IA)
@@ -51,6 +55,19 @@ export class EventsService {
         priority: createEventDto.priority || EventPriority.MEDIA,
       },
     });
+
+    // 🔴 EMITIR A FLUTTER VÍA WEBSOCKET
+    this.eventsGateway.emitNewEvent(event);
+
+    // 🚨 Si es crítico, emitir alerta
+    if (event.priority === EventPriority.CRITICA) {
+      this.eventsGateway.emitAlertTriggered({
+        eventId: event.id,
+        message: `¡Atención! ${event.type} detectado en ${event.location}`,
+        priority: event.priority,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     return event as EventResponseDto;
   }

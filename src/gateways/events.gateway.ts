@@ -32,9 +32,9 @@ import { CamerasService } from '@modules/cameras/cameras.service';
  * @websocket
  */
 @WebSocketGateway({
-  namespace: '/events',
+  namespace: '/api/v1/events',  // Compatible con Flutter
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:8100', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:8100', 'http://localhost:3001', '*'],
     credentials: true,
   },
 })
