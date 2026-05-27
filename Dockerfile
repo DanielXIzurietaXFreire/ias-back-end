@@ -31,6 +31,9 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 
+# Ensure node owns node_modules and prisma artifacts so runtime (USER node) can access them
+RUN chown -R node:node /app/node_modules /app/prisma || true
+
 # Use non-root user
 USER node
 
