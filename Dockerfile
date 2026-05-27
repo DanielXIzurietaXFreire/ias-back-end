@@ -23,9 +23,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends dumb-init ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
-# Copy package files and install production deps
+# Copy package files (dependencies were installed in builder)
 COPY package*.json ./
-RUN npm ci --omit=dev
 
 # Copy built app and prisma artifacts
 COPY --from=builder /app/dist ./dist
