@@ -36,5 +36,5 @@ COPY --from=builder /app/prisma ./prisma
 USER node
 
 EXPOSE 3000
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["sh", "-lc", "npm run migrate:deploy && npm run start:prod"]
+ENTRYPOINT ["dumb-init", "--"]]
+CMD ["sh", "-c", "npm run migrate:deploy && npm run start:prod"]
