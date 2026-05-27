@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ias-backend
+    env: docker
+    branch: main
+    plan: starter
+    dockerfilePath: Dockerfile
+    autoDeploy: true
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_PORT
+        value: "3000"
+      - key: SWAGGER_ENABLED
+        value: "false"
+      - key: CORS_ORIGIN
+        value: "http://localhost:3000,http://localhost:3001,http://localhost:8100"
+      - key: DATABASE_URL
+        value: ""
+      - key: SUPABASE_URL
+        value: ""
+      - key: SUPABASE_ANON_KEY
+        value: ""
+      - key: JWT_SECRET
+        value: ""
