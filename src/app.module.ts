@@ -59,12 +59,6 @@ import { HealthController } from './common/health/health.controller';
   // PROVEEDORES GLOBALES
   // ========================================
   controllers: [HealthController],
-  providers: [
-    EventsGateway, // WebSocket para eventos en tiempo real
-    {
-      provide: 'EventsGateway',
-      useExisting: EventsGateway,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}

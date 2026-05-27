@@ -1,7 +1,10 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { EventsController } from './events.controller';
 import { PrismaService } from '@database/prisma.service';
+import { EventsGateway } from '@gateways/events.gateway';
+import { AlertsModule } from '@modules/alerts/alerts.module';
+import { CamerasModule } from '@modules/cameras/cameras.module';
 
 /**
  * EventsModule - Módulo de eventos de vigilancia
@@ -9,8 +12,9 @@ import { PrismaService } from '@database/prisma.service';
  * @module
  */
 @Module({
-  providers: [EventsService, PrismaService],
+  imports: [forwardRef(() => AlertsModule), CamerasModule],
+  providers: [EventsService, PrismaService, EventsGateway],
   controllers: [EventsController],
-  exports: [EventsService],
+  exports: [EventsService, EventsGateway],
 })
 export class EventsModule {}

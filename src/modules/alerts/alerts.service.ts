@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { AlertPriority } from '@prisma/client';
 import { PrismaService } from '@database/prisma.service';
 import { CreateAlertDto, AlertResponseDto } from './dto';
@@ -18,7 +18,7 @@ import { EventsGateway } from '@gateways/events.gateway';
 export class AlertsService {
   constructor(
     private readonly prisma: PrismaService,
-    @Inject('EventsGateway') private readonly eventsGateway: any,
+    @Inject(forwardRef(() => EventsGateway)) private readonly eventsGateway: EventsGateway,
   ) {}
 
   /**

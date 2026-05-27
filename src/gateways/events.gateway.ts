@@ -8,7 +8,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Logger, Injectable } from '@nestjs/common';
+import { Logger, Injectable, Inject, forwardRef } from '@nestjs/common';
 import { EventsService } from '@modules/events/events.service';
 import { AlertsService } from '@modules/alerts/alerts.service';
 import { CamerasService } from '@modules/cameras/cameras.service';
@@ -46,8 +46,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private connectedClients = new Map<string, Socket>();
 
   constructor(
-    private readonly eventsService: EventsService,
-    private readonly alertsService: AlertsService,
+    @Inject(forwardRef(() => EventsService)) private readonly eventsService: EventsService,
+    @Inject(forwardRef(() => AlertsService)) private readonly alertsService: AlertsService,
     private readonly camerasService: CamerasService,
   ) {}
 
