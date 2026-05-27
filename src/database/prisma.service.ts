@@ -44,8 +44,20 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       const parsedUrl = new URL(databaseUrl);
       const params = parsedUrl.searchParams;
 
-      params.set('pgbouncer', 'false');
-      params.set('connection_limit', '3');
+      // Si la URL apunta a un pooler de Supabase (puerto 6543 o hostname que contiene 'pooler')
+      // habilitar modo transaccional (pgbouncer=true) y limitar conexiones.
+      const isPoolerHost = (parsedUrl.port === '6543') || parsedUrl.hostname.includes('pooler');
+
+      if (isPoolerHost) {
+        params.set('pgbouncer', 'true');
+        // Límite recomendado para servicios en Render; ajustable según necesidad
+        params.set('connection_limit', '5');
+      } else {
+        // Para entornos locales/otros, no forzar pgBouncer. Si no existe, deje como está.
+        if (!params.has('connection_limit')) {
+          params.set('connection_limit', '3');
+        }
+      }
 
       parsedUrl.search = params.toString();
       return parsedUrl.toString();
