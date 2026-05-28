@@ -38,10 +38,8 @@ export class EventsController {
 
   /**
    * Crea un nuevo evento (desde sistema IA)
-   * Nota: En producción este endpoint debería tener autenticación especial
+   * Nota: Este endpoint es público por diseño y no requiere JWT.
    */
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('jwt')
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
